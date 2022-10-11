@@ -1,0 +1,38 @@
+---
+
+matrix_swiclops_enabled: false
+
+
+matrix_swiclops_container_image_self_build: false
+matrix_swiclops_container_image_self_build_repo: "https://gitlab.futo.org/cvwright/swiclops.git"
+matrix_swiclops_docker_image: "gitlab.futo.org:5050/cvwright/swiclops:{{ matrix_swiclops_docker_image_tag }}"
+matrix_swiclops_version: "latest"
+matrix_swiclops_docker_image_tag: "{{ matrix_swiclops_version }}"
+matrix_swiclops_docker_image_force_pull: "{{ matrix_swiclops_docker_image.endswith(':latest') }}"
+
+
+matrix_swiclops_base_path: "{{ matrix_base_data_path }}/swiclops"
+matrix_swiclops_conf_dir_path: "{{ matrix_swiclops_base_path }}/config"
+matrix_swiclops_data_dir_path: "{{ matrix_swiclops_base_path }}/data"
+
+matrix_swiclops_systemd_required_services_list:
+  - "docker.service"
+matrix_swiclops_systemd_wanted_services_list:
+  - "matrix-postgres.service"
+
+matrix_swiclops_container_arguments: []
+
+matrix_swiclops_registration_shared_secret: "{{ matrix_swiclops_registration_shared_secret }}"
+
+matrix_swiclops_database_type: "sqlite"
+matrix_swiclops_sqlite_filename: "/var/lib/swiclops/swiclops.sqlite"
+
+matrix_swiclops_postgres_database: "swiclops"
+matrix_swiclops_postgres_username: "swiclops"
+
+matrix_swiclops_handle_register: true
+matrix_swiclops_handle_login: true
+
+matrix_swiclops_privacy_policy_enabled: false
+
+matrix_swiclops_log_level: "debug"

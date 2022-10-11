@@ -1,0 +1,47 @@
+---
+- name: Ensure Swiclops Docker image is pulled
+  docker_image:
+    name: "{{ matrix_swiclops_docker_image }}"
+    source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
+    force_source: "{{ matrix_swiclops_docker_image_force_pull if ansible_version.major > 2 or ansible_version.minor >= 8 else omit }}"
+    force: "{{ omit if ansible_version.major > 2 or ansible_version.minor >= 8 else matrix_swiclops_docker_image_force_pull }}"
+  register: result
+  retries: "{{ matrix_container_retries_count }}"
+  delay: "{{ matrix_container_retries_delay }}"
+  until: result is not failed
+
+- name: Ensure Swiclops config path exists
+  ansible.builtin.file:
+    path: "{{ matrix_swiclops_conf_dir_path }}"
+    state: directory
+    mode: 0750
+    owner: "{{ matrix_user_username }}"
+    group: "{{ matrix_user_groupname }}"
+
+- name: Ensure Swiclops data path exists
+  ansible.builtin.file:
+    path: "{{ matrix_swiclops_data_dir_path }}"
+    state: directory
+    mode: 0770
+    owner: "{{ matrix_user_username }}"
+    group: "{{ matrix_user_groupname }}"
+
+- name: Ensure Swiclops configuration installed
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/swiclops.yml.j2"
+    dest: "{{ matrix_swiclops_conf_dir_path }}/swiclops.yml"
+    mode: 0644
+    owner: "{{ matrix_user_username }}"
+    group: "{{ matrix_user_groupname }}"
+
+- name: Ensure matrix-swiclops.service installed
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/systemd/matrix-swiclops.service.j2"
+    dest: "{{ matrix_systemd_path }}/matrix-swiclops.service"
+    mode: 0644
+  register: matrix_swiclops_systemd_service_result
+
+- name: Ensure systemd reloaded after matrix-swiclops.service installation
+  ansible.builtin.systemd:
+    daemon_reload: true
+  when: "matrix_swiclops_systemd_service_result.changed | bool"

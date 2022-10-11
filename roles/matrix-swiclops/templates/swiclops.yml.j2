@@ -1,0 +1,79 @@
+matrix:
+  domain: "{{ matrix_domain }}"
+  homeserver: "http://matrix-synapse:8008/"
+
+uia:
+  backend_auth:
+    type: "com.devture.shared_secret_auth"
+    shared_secret: "{{ matrix_synapse_ext_password_provider_shared_secret_auth_shared_secret }}"
+  registration:
+    shared_secret: "{{ matrix_synapse_registration_shared_secret }}"
+    use_admin_api: true
+  bsspeke:
+    curve: "curve25519"
+    oprf_secret: "{{ matrix_swiclops_bsspeke_oprf_secret }}"
+  email:
+    postmark_token: "{{ matrix_swiclops_postmark_token }}"
+  terms:
+    policies:
+{% if matrix_swiclops_privacy_policy_enabled %}
+      - name: "privacy"
+        version: "{{ matrix_swiclops_privacy_policy_version }}"
+        en:
+          name: "Privacy Policy"
+          url: "{{ matrix_swiclops_privacy_policy_url }}"
+{% endif %}
+  default_flows:
+    - stages: ["m.login.password"]
+    - stages: ["m.login.bsspeke-ecc.oprf", "m.login.bsspeke-ecc.verify"]
+  routes:
+{% if matrix_swiclops_handle_login %}
+    - path: "/login"
+      method: "POST"
+      flows:
+        - stages: ["m.login.terms", "m.login.bsspeke-ecc.oprf", "m.login.bsspeke-ecc.verify"]
+    - path: "/login"
+      method: "GET"
+      flows: []
+{% endif %}
+{% if matrix_swiclops_handle_register %}
+    - path: "/register"
+      method: "POST"
+      flows:
+        - stages: ["m.login.registration_token", "m.login.terms", "m.enroll.username", "m.enroll.email.request_token", "m.enroll.email.submit_token", "m.enroll.bsspeke-ecc.oprf", "m.enroll.bsspeke-ecc.save"]
+{% endif %}
+    - path: "/account/auth"
+      method: "POST"
+      flows:
+        - stages: ["m.login.password", "m.enroll.bsspeke-ecc.oprf", "m.enroll.bsspeke-ecc.save"]
+        - stages: ["m.login.bsspeke-ecc.oprf", "m.login.bsspeke-ecc.verify", "m.enroll.bsspeke-ecc.oprf", "m.enroll.bsspeke-ecc.save"]
+    - path: "/account/deactivate"
+      method: "POST"
+    - path: "/account/password"
+      method: "POST"
+      flows:
+        - stages: ["m.login.password", "m.enroll.bsspeke-ecc.oprf", "m.enroll.bsspeke-ecc.save"]
+        - stages: ["m.login.bsspeke-ecc.oprf", "m.login.bsspeke-ecc.verify", "m.enroll.bsspeke-ecc.oprf", "m.enroll.bsspeke-ecc.save"]
+    - path: "/account/3pid/add"
+      method: "POST"
+    - path: "/devices/:deviceId"
+      method: "DELETE"
+    - path: "/delete_devices"
+      method: "POST"
+    - path: "/keys/device_signing/upload"
+      method: "POST"
+
+admin:
+  versions:
+    - "v1"
+        
+#database:
+#  type: postgres
+#  hostname: localhost
+#  port: 5432
+#  username: swiclops
+#  password: hunter2
+#  database: swiclops
+database:
+  type: sqlite
+  filename: "{{ matrix_swiclops_sqlite_filename }}"
