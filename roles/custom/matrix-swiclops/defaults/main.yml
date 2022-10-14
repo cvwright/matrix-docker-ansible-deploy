@@ -22,7 +22,7 @@ matrix_swiclops_systemd_wanted_services_list:
 
 matrix_swiclops_container_arguments: []
 
-matrix_swiclops_registration_shared_secret: "{{ matrix_swiclops_registration_shared_secret }}"
+matrix_swiclops_registration_shared_secret: "{{ matrix_synapse_registration_shared_secret }}"
 
 matrix_swiclops_database_type: "sqlite"
 matrix_swiclops_sqlite_filename: "/var/lib/swiclops/swiclops.sqlite"
