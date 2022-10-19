@@ -15,5 +15,6 @@ matrix_swiclops_uia_endpoints:
   - ^/_matrix/client/(api/v1|r0|v3|unstable)/devices/(.*)
   - ^/_matrix/client/(api/v1|r0|v3|unstable)/delete_devices
   - ^/_matrix/client/(api/v1|r0|v3|unstable)/keys/device_signing/upload
+  - ^/_matrix/client/(api/v1|r0|v3|unstable)/delete_devices
 
 matrix_swiclops_tmp_directory_size_mb: 100
