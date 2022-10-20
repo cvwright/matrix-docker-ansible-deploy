@@ -10,6 +10,7 @@ matrix_swiclops_uia_endpoints:
   - ^/_matrix/client/(api/v1|r0|v3|unstable)/login
   - ^/_matrix/client/(api/v1|r0|v3|unstable)/account/deactivate
   - ^/_matrix/client/(api/v1|r0|v3|unstable)/account/password
+  - ^/_matrix/client/(api/v1|r0|v3|unstable)/account/auth
   - ^/_matrix/client/(api/v1|r0|v3|unstable)/account/3pid/add
   - ^/_matrix/client/(api/v1|r0|v3|unstable)/account/3pid/delete
   - ^/_matrix/client/(api/v1|r0|v3|unstable)/devices/(.*)
