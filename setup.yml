@@ -73,4 +73,5 @@
     - matrix-aux
     - matrix-postgres-backup
     - matrix-backup-borg
+    - matrix-user-creator
     - matrix-common-after
