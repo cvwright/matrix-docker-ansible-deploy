@@ -16,12 +16,19 @@ uia:
     postmark_token: "{{ matrix_swiclops_postmark_token }}"
   terms:
     policies:
-{% if matrix_swiclops_privacy_policy_enabled %}
+{% if matrix_swiclops_policy_privacy_enabled %}
       - name: "privacy"
-        version: "{{ matrix_swiclops_privacy_policy_version }}"
+        version: "{{ matrix_swiclops_policy_privacy_version }}"
         en:
           name: "Privacy Policy"
-          url: "{{ matrix_swiclops_privacy_policy_url }}"
+          url: "{{ matrix_swiclops_policy_privacy_url }}"
+{% endif %}
+{% if matrix_swiclops_policy_terms_enabled %}
+      - name: "terms"
+        version: "{{ matrix_swiclops_policy_terms_version }}"
+        en:
+          name: "Terms and Conditions"
+          url: "{{ matrix_swiclops_policy_terms_url }}"
 {% endif %}
   default_flows:
     - stages: ["m.login.password"]
