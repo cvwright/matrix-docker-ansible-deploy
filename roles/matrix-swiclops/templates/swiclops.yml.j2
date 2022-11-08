@@ -47,7 +47,7 @@ uia:
     - path: "/register"
       method: "POST"
       flows:
-        - stages: ["m.login.registration_token", "m.login.terms", "m.enroll.username", "m.enroll.email.request_token", "m.enroll.email.submit_token", "m.enroll.bsspeke-ecc.oprf", "m.enroll.bsspeke-ecc.save"]
+        - stages: ["m.login.terms", "m.enroll.username", "m.enroll.email.request_token", "m.enroll.email.submit_token", "m.enroll.bsspeke-ecc.oprf", "m.enroll.bsspeke-ecc.save"]
 {% endif %}
     - path: "/account/auth"
       method: "POST"
