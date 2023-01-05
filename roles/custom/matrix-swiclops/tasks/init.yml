@@ -1,0 +1,5 @@
+---
+
+- ansible.builtin.set_fact:
+    matrix_systemd_services_list: "{{ matrix_systemd_services_list + ['matrix-swiclops.service'] }}"
+  when: matrix_swiclops_enabled | bool

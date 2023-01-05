@@ -287,6 +287,13 @@ matrix_nginx_proxy_proxy_matrix_3pid_registration_enabled: false
 matrix_nginx_proxy_proxy_matrix_3pid_registration_addr_with_container: "matrix-ma1sd:{{ matrix_ma1sd_container_port }}"
 matrix_nginx_proxy_proxy_matrix_3pid_registration_addr_sans_container: "127.0.0.1:{{ matrix_ma1sd_container_port }}"
 
+# Controls whether proxying for the UIA service should be done (on the matrix domain)
+# This allows the specialized UIA service to offer a wider variety of user-interactive auth modules
+matrix_nginx_proxy_proxy_uia_enabled: false
+matrix_nginx_proxy_proxy_uia_endpoints: "{{ matrix_swiclops_uia_endpoints }}"
+matrix_nginx_proxy_proxy_uia_addr_with_container: "matrix-swiclops:{{ matrix_swiclops_port }}"
+matrix_nginx_proxy_proxy_uia_addr_sans_container: "127.0.0.1:{{ matrix_swiclops_port }}"
+
 # Controls whether proxying for the Identity API (`/_matrix/identity`) should be done (on the matrix domain)
 matrix_nginx_proxy_proxy_matrix_identity_api_enabled: false
 matrix_nginx_proxy_proxy_matrix_identity_api_addr_with_container: "matrix-ma1sd:{{ matrix_ma1sd_container_port }}"

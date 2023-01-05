@@ -1,0 +1,8 @@
+---
+
+- import_tasks: "{{ role_path }}/tasks/swiclops/setup_install.yml"
+  when: "matrix_swiclops_enabled | bool"
+
+- import_tasks: "{{ role_path }}/tasks/swiclops/setup_uninstall.yml"
+  when: "not matrix_swiclops_enabled | bool"
+

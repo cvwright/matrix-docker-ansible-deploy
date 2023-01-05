@@ -1,0 +1,17 @@
+---
+
+# Tells whether this role had executed or not. Toggled to `true` during runtime.
+matrix_swiclops_role_executed: false
+
+matrix_swiclops_port: 8080
+
+matrix_swiclops_uia_endpoints:
+  - /_matrix/client/(api/v1|r0|v3|unstable)/register
+  - /_matrix/client/(api/v1|r0|v3|unstable)/login
+  - ^/_matrix/client/(api/v1|r0|v3|unstable)/account/deactivate
+  - ^/_matrix/client/(api/v1|r0|v3|unstable)/account/password
+  - ^/_matrix/client/(api/v1|r0|v3|unstable)/account/3pid/add
+  - ^/_matrix/client/(api/v1|r0|v3|unstable)/account/3pid/delete
+  - ^/_matrix/client/(api/v1|r0|v3|unstable)/keys/device_signing/upload
+
+matrix_swiclops_tmp_directory_size_mb: 100
