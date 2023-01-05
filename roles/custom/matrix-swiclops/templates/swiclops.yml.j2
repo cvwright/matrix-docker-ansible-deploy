@@ -14,6 +14,7 @@ uia:
     oprf_secret: "{{ matrix_swiclops_bsspeke_oprf_secret }}"
   email:
     postmark_token: "{{ matrix_swiclops_postmark_token }}"
+{% if matrix_swiclops_policy_privacy_enabled or matrix_swiclops_policy_terms_enabled %}
   terms:
     policies:
 {% if matrix_swiclops_policy_privacy_enabled %}
@@ -29,6 +30,7 @@ uia:
         en:
           name: "Terms and Conditions"
           url: "{{ matrix_swiclops_policy_terms_url }}"
+{% endif %}
 {% endif %}
   default_flows:
     - stages: ["m.login.password"]
