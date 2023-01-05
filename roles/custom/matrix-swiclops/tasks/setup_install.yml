@@ -37,11 +37,5 @@
 - name: Ensure matrix-swiclops.service installed
   ansible.builtin.template:
     src: "{{ role_path }}/templates/systemd/matrix-swiclops.service.j2"
-    dest: "{{ matrix_systemd_path }}/matrix-swiclops.service"
+    dest: "{{ devture_systemd_docker_base_systemd_path }}/matrix-swiclops.service"
     mode: 0644
-  register: matrix_swiclops_systemd_service_result
-
-- name: Ensure systemd reloaded after matrix-swiclops.service installation
-  ansible.builtin.systemd:
-    daemon_reload: true
-  when: "matrix_swiclops_systemd_service_result.changed | bool"

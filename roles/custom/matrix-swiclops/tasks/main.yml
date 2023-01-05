@@ -1,11 +1,18 @@
 ---
 
-- import_tasks: "{{ role_path }}/tasks/init.yml"
-  tags:
-    - always
+- block:
+    - when: matrix_swiclops_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/setup_install.yml"
 
-- import_tasks: "{{ role_path }}/tasks/swiclops/setup.yml"
-  when: run_setup | bool
+  tags:
+    - setup-all
+    - setup-swiclops
+    - install-all
+    - install-swiclops
+
+- block:
+    - when: not matrix_swiclops_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/setup_uninstall.yml"
   tags:
     - setup-all
     - setup-swiclops
@@ -15,4 +22,3 @@
     matrix_swiclops_role_executed: true
   tags:
     - always
-

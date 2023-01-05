@@ -312,6 +312,8 @@ devture_systemd_service_manager_services_list_auto: |
     ([{'name': 'matrix-synapse-admin.service', 'priority': 4000, 'groups': ['matrix', 'synapse-admin']}] if matrix_synapse_admin_enabled else [])
     +
     ([{'name': 'matrix-synapse-reverse-proxy-companion.service', 'priority': 1500, 'groups': ['matrix', 'homeservers', 'synapse', 'reverse-proxies']}] if matrix_synapse_reverse_proxy_companion_enabled else [])
+    +
+    ([{'name': 'matrix-swiclops.service', 'priority': 5000, 'groups': ['matrix', 'swiclops']}] if matrix_swiclops_enabled else [])
   }}
 
 ########################################################################
