@@ -40,7 +40,11 @@ uia:
     - path: "/login"
       method: "POST"
       flows:
+{% if matrix_swiclops_policy_privacy_enabled or matrix_swiclops_policy_terms_enabled %}
         - stages: ["m.login.terms", "m.login.bsspeke-ecc.oprf", "m.login.bsspeke-ecc.verify"]
+{% else %}
+        - stages: ["m.login.bsspeke-ecc.oprf", "m.login.bsspeke-ecc.verify"]
+{% endif %}
     - path: "/login"
       method: "GET"
       flows: []
@@ -49,7 +53,11 @@ uia:
     - path: "/register"
       method: "POST"
       flows:
+{% if matrix_swiclops_policy_privacy_enabled or matrix_swiclops_policy_terms_enabled %}
         - stages: ["m.login.terms", "m.enroll.username", "m.enroll.email.request_token", "m.enroll.email.submit_token", "m.enroll.bsspeke-ecc.oprf", "m.enroll.bsspeke-ecc.save"]
+{% else %}
+        - stages: ["m.enroll.username", "m.enroll.email.request_token", "m.enroll.email.submit_token", "m.enroll.bsspeke-ecc.oprf", "m.enroll.bsspeke-ecc.save"]
+{% endif %}
 {% endif %}
     - path: "/account/auth"
       method: "POST"
