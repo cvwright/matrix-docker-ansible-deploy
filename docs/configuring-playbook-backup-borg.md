@@ -40,7 +40,7 @@ Minimal working configuration (`inventory/host_vars/matrix.DOMAIN/vars.yml`) to 
 ```yaml
 matrix_backup_borg_enabled: true
 matrix_backup_borg_location_repositories:
- - USER@HOST:REPO
+ - ssh://USER@HOST/./REPO
 matrix_backup_borg_storage_encryption_passphrase: "PASSPHRASE"
 matrix_backup_borg_ssh_key_private: |
   -----BEGIN OPENSSH PRIVATE KEY-----
@@ -64,7 +64,7 @@ To backup without encryption, add `matrix_backup_borg_encryption: 'none'` to you
 
 `matrix_backup_borg_location_source_directories` defines the list of directories to back up: it's set to `{{ matrix_base_data_path }}` by default, which is the base directory for every service's data, such as Synapse, Postgres and the bridges. You might want to exclude certain directories or file patterns from the backup using the `matrix_backup_borg_location_exclude_patterns` variable.
 
-Check the `roles/matrix-backup-borg/defaults/main.yml` file for the full list of available options.
+Check the `roles/custom/matrix-backup-borg/defaults/main.yml` file for the full list of available options.
 
 ## Installing
 

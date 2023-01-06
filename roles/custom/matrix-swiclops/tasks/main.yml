@@ -1,0 +1,24 @@
+---
+
+- block:
+    - when: matrix_swiclops_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/setup_install.yml"
+
+  tags:
+    - setup-all
+    - setup-swiclops
+    - install-all
+    - install-swiclops
+
+- block:
+    - when: not matrix_swiclops_enabled | bool
+      ansible.builtin.include_tasks: "{{ role_path }}/tasks/setup_uninstall.yml"
+  tags:
+    - setup-all
+    - setup-swiclops
+
+- name: Mark matrix-swiclops role as executed
+  ansible.builtin.set_fact:
+    matrix_swiclops_role_executed: true
+  tags:
+    - always
