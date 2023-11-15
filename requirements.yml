@@ -53,5 +53,5 @@
 - src: git+https://gitlab.com/etke.cc/roles/redis.git
   version: v7.2.0-0
 - src: git+https://gitlab.futo.org/cvwright/ansible-role-swiclops.git
-  version: ea7a6d01ef2347643af347527729502570db9645
+  version: 6483c0965866aae37227ee889b8592d29dc06751
   name: swiclops
