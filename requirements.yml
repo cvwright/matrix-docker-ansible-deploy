@@ -74,5 +74,5 @@
   name: traefik_certs_dumper
 
 - src: git+https://gitlab.futo.org/cvwright/ansible-role-swiclops.git
-  version: 6483c0965866aae37227ee889b8592d29dc06751
+  version: eb59e7af5e31301db9e089f2750ef1a0c6198fbc
   name: swiclops
