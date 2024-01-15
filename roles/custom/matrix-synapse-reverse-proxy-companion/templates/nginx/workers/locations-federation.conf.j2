@@ -1,0 +1,21 @@
+# locations-federation.conf - Based on https://tcpipuk.github.io/synapse/deployment/nginx.html
+
+# Federation: Main overrides
+location ~ ^/_matrix/federation/v1/openid/userinfo$ {
+  set $proxy_pass http://synapse_inbound_main;
+  include proxy.conf;
+}
+
+### FEDERATION ###
+
+# Federation rooms
+location ~ ^/_matrix/federation/v[12]/(?:state_ids|get_missing_events)/(?:%21|!)(?<room>[A-Za-z0-9._=\-\/]+)(:|%3A)[A-Za-z0-9.\-]+ {
+  set $proxy_pass http://synapse_inbound_room_workers;
+  include proxy.conf;
+}
+
+# Federation readers
+location ~ ^/_matrix/(federation/(v1|v2)|key/v2)/ {
+  set $proxy_pass http://synapse_inbound_federation_readers;
+  include proxy.conf;
+}
