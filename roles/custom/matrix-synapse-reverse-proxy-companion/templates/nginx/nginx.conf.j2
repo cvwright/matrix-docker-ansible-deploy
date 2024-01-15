@@ -73,5 +73,7 @@ http {
 		''      close;
 	}
 
+	include /etc/nginx/workers/maps.conf;
+
 	include /etc/nginx/conf.d/*.conf;
 }

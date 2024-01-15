@@ -1,46 +1,143 @@
-# upstreams.conf - From https://tcpipuk.github.io/synapse/deployment/nginx.html
+# upstreams.conf - Based on https://tcpipuk.github.io/synapse/deployment/nginx.html
+
+# First, find all of our pools of workers ######################################
+
+# Room workers
+{% set room_workers = matrix_synapse_reverse_proxy_companion_synapse_workers_list | selectattr('type', 'equalto', 'room_worker') | list %}
+# Client syncs
+{% set client_syncs = matrix_synapse_reverse_proxy_companion_synapse_workers_list | selectattr('type', 'equalto', 'sync_worker') | list %}
+# Client readers
+{% set client_readers = matrix_synapse_reverse_proxy_companion_synapse_workers_list | selectattr('type', 'equalto', 'client_reader') | list %}
+# Federation readers
+{% set federation_readers = matrix_synapse_reverse_proxy_companion_synapse_workers_list | selectattr('type', 'equalto', 'federation_reader') | list %}
+
+# Generic workers
+{% set generic_workers = matrix_synapse_reverse_proxy_companion_synapse_workers_list | selectattr('type', 'equalto', 'generic_worker') | list %}
+# Typing stream writer
+{% set stream_writer_typing_stream_workers = matrix_synapse_reverse_proxy_companion_synapse_workers_list | selectattr('type', 'equalto', 'stream_writer') | selectattr('stream_writer_stream', 'equalto', 'typing') | list %}
+# To-device stream writer
+{% set stream_writer_to_device_stream_workers = matrix_synapse_reverse_proxy_companion_synapse_workers_list | selectattr('type', 'equalto', 'stream_writer') | selectattr('stream_writer_stream', 'equalto', 'to_device') | list %}
+# Account data stream writer
+{% set stream_writer_account_data_stream_workers = matrix_synapse_reverse_proxy_companion_synapse_workers_list | selectattr('type', 'equalto', 'stream_writer') | selectattr('stream_writer_stream', 'equalto', 'account_data') | list %}
+# Receipts stream writer
+{% set stream_writer_receipts_stream_workers = matrix_synapse_reverse_proxy_companion_synapse_workers_list | selectattr('type', 'equalto', 'stream_writer') | selectattr('stream_writer_stream', 'equalto', 'receipts') | list %}
+# Presence stream writer
+{% set stream_writer_presence_stream_workers = matrix_synapse_reverse_proxy_companion_synapse_workers_list | selectattr('type', 'equalto', 'stream_writer') | selectattr('stream_writer_stream', 'equalto', 'presence') | list %}
+# Media repository workers
+{% set media_repository_workers = matrix_synapse_reverse_proxy_companion_synapse_workers_list | selectattr('type', 'equalto', 'media_repository') | list %}
+# User directory workers
+{% set user_dir_workers = matrix_synapse_reverse_proxy_companion_synapse_workers_list | selectattr('type', 'equalto', 'user_dir') | list %}
+
+# Now define the upstreams for each worker pool ################################
 
 # Client non-room requests
+{% if client_readers | length > 0 %}
 upstream synapse_inbound_client_readers {
-  # least_conn;
-  server unix:/sockets/synapse_inbound_client_reader1.sock max_fails=0;
+  {% if client_readers | length > 1 %}
+  least_conn;
+  {% endif %}
+  {% for worker in client_readers %}
+  server "{{ worker.name }}:{{ worker.port }}" max_fails=0;
+  {% endfor %}
   keepalive 10;
 }
+{% endif %}
 
 # Client sync workers
+{% if client_syncs | length > 0 %}
 upstream synapse_inbound_client_syncs {
-  # hash $mxid_localpart consistent;
-  server unix:/sockets/synapse_inbound_client_sync1.sock max_fails=0;
+  {% if client_syncs | length > 1 %}
+  hash $mxid_localpart consistent;
+  {% endif %}
+  {% for worker in client_syncs %}
+  server "{{ worker.name }}:{{ worker.port }}" max_fails=0;
+  {% endfor %}
   keepalive 10;
 }
+{% endif %}
 
 # Federation non-room requests
+{% if federation_readers | length > 0 %}
 upstream synapse_inbound_federation_readers {
-  # ip_hash;
-  server unix:/sockets/synapse_inbound_federation_reader1.sock max_fails=0;
+  {% if federation_readers | length > 1 %}
+  hash $http_x_forwarded_for;  # This was ip_hash but in the playbook nginx is behind traefik
+  {% endif %}
+  {% for worker in federation_readers %}
+  server "{{ worker.name }}:{{ worker.port }}" max_fails=0;
+  {% endfor %}
   keepalive 10;
 }
+{% endif %}
 
-# Media requests
-upstream synapse_inbound_media {
-  # least_conn;
-  server unix:/sockets/synapse_inbound_media1.sock max_fails=0;
-  keepalive 10;
-}
+# Media requests -- Commenting this out in favor of the playbook's existing media upstream
+#{% if media_repository_workers | length > 0 %}
+#upstream synapse_inbound_media {
+#  {% if media_repository_workers | length > 1 %}
+#  least_conn;
+#  {% endif %}
+#  {% for worker in media_repository_workers %}
+#  server "{{ worker.name }}:{{ worker.port }}" max_fails=0;
+#  {% endfor %}
+#  keepalive 10;
+#}
+#{% endif %}
 
-# Synapse main thread
-upstream synapse_inbound_main {
-  server unix:/sockets/synapse_inbound_main.sock max_fails=0;
-  keepalive 10;
-}
+# Synapse main thread -- Commenting this out in favor of the playbook's existing config
+#upstream synapse_inbound_main {
+#  server unix:/sockets/synapse_inbound_main.sock max_fails=0;
+#  keepalive 10;
+#}
 
 # Client/federation room requests
+{% if room_workers | length > 0 %}
 upstream synapse_inbound_room_workers {
+  {% if room_workers | length > 1 %}
   hash $room_name consistent;
-  server unix:/sockets/synapse_inbound_rooms1.sock max_fails=0;
-  server unix:/sockets/synapse_inbound_rooms2.sock max_fails=0;
-  server unix:/sockets/synapse_inbound_rooms3.sock max_fails=0;
-  server unix:/sockets/synapse_inbound_rooms4.sock max_fails=0;
+  {% endif %}
+  {% for worker in room_workers %}
+  server "{{ worker.name }}:{{ worker.port }}" max_fails=0;
+  {% endfor %}
   keepalive 10;
 }
+{% endif %}
+
+
+# Existing upstreams from the playbook #########################################
+# - Ideally we could use this macro to render Tom's upstreams (above) too
+# - But we will need a way to specify the load-balancing method for each one
+# - On the plus side, that would allow using the macro for generic_workers too
+
+{% macro render_worker_upstream(name, workers) %}
+{% if workers | length > 0 %}
+	upstream {{ name }} {
+		keepalive {{ workers | length * 2 }};
+		{% for worker in workers %}
+			server "{{ worker.name }}:{{ worker.port }}";
+		{% endfor %}
+	}
+{% endif %}
+{% endmacro %}
+
+{% if generic_workers |length > 0 %}
+upstream generic_workers_upstream {
+	# ensures that requests from the same client will always be passed
+	# to the same server (except when this server is unavailable)
+	hash $http_x_forwarded_for;
+	keepalive {{ generic_workers | length * 2 }};
+
+	{% for worker in generic_workers %}
+		server "{{ worker.name }}:{{ worker.port }}";
+	{% endfor %}
+}
+{% endif %}
+
+{{ render_worker_upstream('stream_writer_typing_stream_workers_upstream', stream_writer_typing_stream_workers) }}
+{{ render_worker_upstream('stream_writer_to_device_stream_workers_upstream', stream_writer_to_device_stream_workers) }}
+{{ render_worker_upstream('stream_writer_account_data_stream_workers_upstream', stream_writer_account_data_stream_workers) }}
+{{ render_worker_upstream('stream_writer_receipts_stream_workers_upstream', stream_writer_receipts_stream_workers) }}
+{{ render_worker_upstream('stream_writer_presence_stream_workers_upstream', stream_writer_presence_stream_workers) }}
+
+{{ render_worker_upstream('media_repository_workers_upstream', media_repository_workers) }}
+
+{{ render_worker_upstream('user_dir_workers_upstream', user_dir_workers) }}
 

@@ -1,25 +1,5 @@
 #jinja2: lstrip_blocks: "True"
 
-{% set generic_workers = matrix_synapse_reverse_proxy_companion_synapse_workers_list | selectattr('type', 'equalto', 'generic_worker') | list %}
-{% set stream_writer_typing_stream_workers = matrix_synapse_reverse_proxy_companion_synapse_workers_list | selectattr('type', 'equalto', 'stream_writer') | selectattr('stream_writer_stream', 'equalto', 'typing') | list %}
-{% set stream_writer_to_device_stream_workers = matrix_synapse_reverse_proxy_companion_synapse_workers_list | selectattr('type', 'equalto', 'stream_writer') | selectattr('stream_writer_stream', 'equalto', 'to_device') | list %}
-{% set stream_writer_account_data_stream_workers = matrix_synapse_reverse_proxy_companion_synapse_workers_list | selectattr('type', 'equalto', 'stream_writer') | selectattr('stream_writer_stream', 'equalto', 'account_data') | list %}
-{% set stream_writer_receipts_stream_workers = matrix_synapse_reverse_proxy_companion_synapse_workers_list | selectattr('type', 'equalto', 'stream_writer') | selectattr('stream_writer_stream', 'equalto', 'receipts') | list %}
-{% set stream_writer_presence_stream_workers = matrix_synapse_reverse_proxy_companion_synapse_workers_list | selectattr('type', 'equalto', 'stream_writer') | selectattr('stream_writer_stream', 'equalto', 'presence') | list %}
-{% set media_repository_workers = matrix_synapse_reverse_proxy_companion_synapse_workers_list | selectattr('type', 'equalto', 'media_repository') | list %}
-{% set user_dir_workers = matrix_synapse_reverse_proxy_companion_synapse_workers_list | selectattr('type', 'equalto', 'user_dir') | list %}
-
-{% macro render_worker_upstream(name, workers) %}
-{% if workers | length > 0 %}
-	upstream {{ name }} {
-		keepalive {{ workers | length * 2 }};
-		{% for worker in workers %}
-			server "{{ worker.name }}:{{ worker.port }}";
-		{% endfor %}
-	}
-{% endif %}
-{% endmacro %}
-
 {% macro render_locations_to_upstream(locations, upstream_name) %}
 	{% for location in locations %}
 	location ~ {{ location }} {
@@ -35,30 +15,10 @@
 	{% if matrix_synapse_reverse_proxy_companion_synapse_cache_enabled %}
     	proxy_cache_path  {{ matrix_synapse_reverse_proxy_companion_synapse_cache_path }} levels=1:2 keys_zone={{ matrix_synapse_reverse_proxy_companion_synapse_cache_keys_zone_name }}:{{ matrix_synapse_reverse_proxy_companion_synapse_cache_keys_zone_size }} inactive={{ matrix_synapse_reverse_proxy_companion_synapse_cache_inactive_time }} max_size={{ matrix_synapse_reverse_proxy_companion_synapse_cache_max_size_mb }}m;
 	{% endif %}
-	# Round Robin "upstream" pools for workers
 
-	{% if generic_workers |length > 0 %}
-	upstream generic_workers_upstream {
-		# ensures that requests from the same client will always be passed
-		# to the same server (except when this server is unavailable)
-		hash $http_x_forwarded_for;
-		keepalive {{ generic_workers | length * 2 }};
+	include /etc/nginx/workers/upstreams.conf;
 
-		{% for worker in generic_workers %}
-			server "{{ worker.name }}:{{ worker.port }}";
-		{% endfor %}
-	}
-	{% endif %}
 
-	{{ render_worker_upstream('stream_writer_typing_stream_workers_upstream', stream_writer_typing_stream_workers) }}
-	{{ render_worker_upstream('stream_writer_to_device_stream_workers_upstream', stream_writer_to_device_stream_workers) }}
-	{{ render_worker_upstream('stream_writer_account_data_stream_workers_upstream', stream_writer_account_data_stream_workers) }}
-	{{ render_worker_upstream('stream_writer_receipts_stream_workers_upstream', stream_writer_receipts_stream_workers) }}
-	{{ render_worker_upstream('stream_writer_presence_stream_workers_upstream', stream_writer_presence_stream_workers) }}
-
-	{{ render_worker_upstream('media_repository_workers_upstream', media_repository_workers) }}
-
-	{{ render_worker_upstream('user_dir_workers_upstream', user_dir_workers) }}
 {% endif %}
 
 server {
