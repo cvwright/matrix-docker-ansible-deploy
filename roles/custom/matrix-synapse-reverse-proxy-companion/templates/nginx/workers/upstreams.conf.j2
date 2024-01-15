@@ -1,0 +1,46 @@
+# upstreams.conf - From https://tcpipuk.github.io/synapse/deployment/nginx.html
+
+# Client non-room requests
+upstream synapse_inbound_client_readers {
+  # least_conn;
+  server unix:/sockets/synapse_inbound_client_reader1.sock max_fails=0;
+  keepalive 10;
+}
+
+# Client sync workers
+upstream synapse_inbound_client_syncs {
+  # hash $mxid_localpart consistent;
+  server unix:/sockets/synapse_inbound_client_sync1.sock max_fails=0;
+  keepalive 10;
+}
+
+# Federation non-room requests
+upstream synapse_inbound_federation_readers {
+  # ip_hash;
+  server unix:/sockets/synapse_inbound_federation_reader1.sock max_fails=0;
+  keepalive 10;
+}
+
+# Media requests
+upstream synapse_inbound_media {
+  # least_conn;
+  server unix:/sockets/synapse_inbound_media1.sock max_fails=0;
+  keepalive 10;
+}
+
+# Synapse main thread
+upstream synapse_inbound_main {
+  server unix:/sockets/synapse_inbound_main.sock max_fails=0;
+  keepalive 10;
+}
+
+# Client/federation room requests
+upstream synapse_inbound_room_workers {
+  hash $room_name consistent;
+  server unix:/sockets/synapse_inbound_rooms1.sock max_fails=0;
+  server unix:/sockets/synapse_inbound_rooms2.sock max_fails=0;
+  server unix:/sockets/synapse_inbound_rooms3.sock max_fails=0;
+  server unix:/sockets/synapse_inbound_rooms4.sock max_fails=0;
+  keepalive 10;
+}
+
