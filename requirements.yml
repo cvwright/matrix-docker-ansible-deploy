@@ -78,6 +78,6 @@
 
 # Swiclops authentication service
 - src: git+https://gitlab.futo.org/cvwright/ansible-role-swiclops.git
-  version: 6914e26445b504b50031c914e4d5b421d28aa095
+  version: cf6c2c5ea0b4dc98d7faa451b1cddc1ba7b9b229
   name: swiclops
 # End swiclops changes
